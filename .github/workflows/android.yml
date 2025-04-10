@@ -3,9 +3,15 @@ name: Android CI
 on:
   push:
     branches: [ "master" ]
+    tags:
+      - '*'
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag for release'
+        required: true
 
 jobs:
   build:
@@ -29,9 +35,19 @@ jobs:
 
     - name: Build Release
       run: ./gradlew assembleRelease -Pandroid.injected.signing.store.file=/tmp/keystore.jks -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEYSTORE_PASSWORD }}
+
+    - name: Determine tag name
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "TAG_NAME=${{ inputs.tag_name }}" >> $GITHUB_ENV
+        elif [[ "${{ github.event_name }}" == "push" ]]; then
+          echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        else
+          echo "TAG_NAME=pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+        fi
       
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
         files: app/build/outputs/intermediates/apk/app-release.apk
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ env.TAG_NAME }}
