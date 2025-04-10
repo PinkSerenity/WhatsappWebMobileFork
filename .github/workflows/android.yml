@@ -43,10 +43,8 @@ jobs:
     - name: Determine tag name
       run: |
         find . -name "*apk*" 2>/dev/null
-        find . -name "*apk*" -quit | echo >> $path
       
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
-        files: ${{ path }}
         tag_name: ${{ env.TAG_NAME }}
