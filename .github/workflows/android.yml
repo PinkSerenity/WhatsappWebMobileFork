@@ -39,12 +39,9 @@ jobs:
         else
           echo "TAG_NAME=pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
         fi
-
-    - name: Determine tag name
-      run: |
-        find . -name "*apk*" 2>/dev/null
       
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
+        files: ./app/build/outputs/apk/release/app-release.apk
         tag_name: ${{ env.TAG_NAME }}
