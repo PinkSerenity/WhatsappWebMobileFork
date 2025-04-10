@@ -34,3 +34,4 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: app/build/outputs/intermediates/apk/app-release.apk
+        tag_name: ${{ github.ref }}
